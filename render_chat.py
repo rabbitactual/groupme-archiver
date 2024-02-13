@@ -174,7 +174,7 @@ def render_time_message(page_elements, message, prev_time, timezone=None):
         with tag('div', klass='message_container'):
             doc.attr(style="background-color: #e4e4e4")
             with tag('span', klass='system_message'):
-                text(message_time.strftime('%b %d, %Y at %-I:%M %p'))
+                text(message_time.strftime('%m/%d/%Y, %H:%M:%S'))
 
     return message_time
 
@@ -184,7 +184,7 @@ def render_system_message(page_elements, message, timezone=None):
 
     message_time = datetime.fromtimestamp(message['created_at'], timezone)
     with tag('div', klass='message_container'):
-        doc.attr(title=message_time.strftime('%b %d, %Y at %-I:%M %p'))
+        doc.attr(title=message_time.strftime('%m/%d/%Y, %H:%M:%S'))
         doc.attr(style="background-color: #e4e4e4")
         with tag('span', klass='system_message'):
             text(message['text'] or '<ATTACHMENT>')
@@ -198,7 +198,7 @@ def render_avatar(input_dir, page_elements, people, message):
         avatar_path = "%s.avatar" % (message['author'])
         avatar_path = os.path.join('avatars', avatar_path)
         avatar_path = glob.glob("%s/%s*" % (input_dir, avatar_path))[0]
-        avatar_path = "/".join(avatar_path.split('/')[-2:])
+        avatar_path = avatar_path.split('/')[-1]
         doc.asis('<img src="%s"></img>' % (avatar_path))
     else:
         names = people[message['author']]['name'].split()
@@ -219,7 +219,7 @@ def render_message(input_dir, page_elements, people, message, timezone=None):
 
     message_time = datetime.fromtimestamp(message['created_at'], timezone)
     with tag('div', klass='message_container'):
-        doc.attr(title=message_time.strftime('%b %d, %Y at %-I:%M %p'))
+        doc.attr(title=message_time.strftime('%m/%d/%Y, %H:%M:%S'))
         with tag('div', klass='avatar'):
             render_avatar(input_dir, page_elements, people, message)
         with tag('div', klass='message_box'):
@@ -233,7 +233,7 @@ def render_message(input_dir, page_elements, people, message, timezone=None):
                         image_path = os.path.join('attachments', image_path)
                         r = glob.glob("%s/%s*" % (input_dir, image_path))
                         image_path = r[0]
-                        image_path = "/".join(image_path.split('/')[-2:])
+                        image_path = image_path.split('/')[-1]
                         with tag('span', klass='message'):
                             doc.asis('<img src="%s"></img>' % (
                                 image_path))
@@ -242,7 +242,7 @@ def render_message(input_dir, page_elements, people, message, timezone=None):
                         video_path = os.path.join('attachments', video_path)
                         r = glob.glob("%s/%s*" % (input_dir, video_path))[0]
                         video_path = r
-                        video_path = "/".join(video_path.split('/')[-2:])
+                        video_path = video_path.split('/')[-1]
                         with tag('span', klass='message'):
                             doc.asis('<video src="%s" controls></video>' % (
                                 video_path))
@@ -305,13 +305,13 @@ def main():
         print("Missing files!")
         sys.exit(1)
 
-    with open(os.path.join(args.input_dir, 'people.json')) as fp:
+    with open(os.path.join(args.input_dir, 'people.json'), encoding='utf-8') as fp:
         people = json.load(fp)
 
-    with open(os.path.join(args.input_dir, 'messages.json')) as fp:
+    with open(os.path.join(args.input_dir, 'messages.json'), encoding='utf-8') as fp:
         messages = json.load(fp)
 
-    with open(os.path.join(args.input_dir, 'group_info.json')) as fp:
+    with open(os.path.join(args.input_dir, 'group_info.json'), encoding='utf-8') as fp:
         group_info = json.load(fp)
 
     page_elements = Doc().tagtext()
@@ -352,7 +352,7 @@ def main():
                                        message, tz)
 
     # Save rendered files
-    with open(os.path.join(args.input_dir, 'rendered.html'), 'w') as fp:
+    with open(os.path.join(args.input_dir, 'rendered.html'), 'w', encoding='utf-8') as fp:
         fp.write(doc.getvalue())
 
     with open(os.path.join(args.input_dir, 'main.css'), 'w') as fp:
